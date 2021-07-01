@@ -163,8 +163,8 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
-  // return !(~(x+1)^x ) &! !(x+1);
-  return !(((x+1)^x )+ 1) &!!(x+1);
+  // return !(~(x+1)^x) &! !(x+1);
+  return !(((x+1)^x)+1) &!!(x+1);
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -178,7 +178,7 @@ int allOddBits(int x) {
   int a = 0xAA << 8; // 0xAA00
   int b = 0xAA | a; // 0xAAAA
   int c = b << 16 | b; ///0xAAAAAAAA
-  return  !(x & c ^ c);
+  return  !((x & c) ^ c);
 
 }
 /* 
@@ -189,7 +189,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x+1;
 }
 //3
 /* 
@@ -202,7 +202,10 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  int a = !(x>>4 ^ 0x3);
+  int b = !(x & 0x8);
+  int c = !(x & 0x6);
+  return a & (b | c);
 }
 /* 
  * conditional - same as x ? y : z 
