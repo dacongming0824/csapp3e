@@ -258,7 +258,24 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  int b16, b8, b4, b2, b1, b0;
+  int sign=x>>31;
+  x = (sign&~x)|(~sign&x);
+  // negative 111111111111111 positive 0000000000000000
+  // ~x | 0000000000  00000000000 | x
+  // 00100010000 00000010001
+  b16 = !! (x >> 16) << 4; // most significant 16 bits all zeros return 0000000000, else 000000000010000
+  x = x >> b16;
+  b8 = !! (x >> 8) << 3;
+  x = x >> b8;
+  b4 = !! (x >> 4) << 2;
+  x = x >> b4;
+  b2 = !! (x >> 2) << 1;
+  x = x >> b2;
+  b1 = !!(x >> 1);
+  x = x >> b1;
+  b0 = x;
+  return b16 + b8 + b4 + b2 + b1 + b0 + 1;
 }
 //float
 /* 
