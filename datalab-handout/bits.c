@@ -290,7 +290,16 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  unsigned exp = (uf & 0x7f800000) >>23;
+  unsigned sign = uf & (0x1<<31);
+  // exp = 255 return NaN or Infinite
+  if (exp == 255) return uf;
+  // denormalized value
+  if (exp == 0) return uf<<1 | sign;
+  exp++;
+  // if exp reaches 255 return Infinite
+  if (exp == 255) return (sign| 0x7f800000);
+  return (exp<<23)|(uf&0x807fffff);
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
@@ -305,7 +314,30 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  // 1 8 23
+  // 10100000.000001 1.1100000000001* 2^26
+  // frac1 0011000000000 32位
+  int sign = (uf >> 31) & 0x1; // 1
+  int exp = (uf >> 23) & 0xff; // 8
+  int frac = uf & 0x7fffff; // 23
+  // denormalized value, 0<M<1,  -1<fp<1
+  if (exp ==0) return 0;
+  // NaN or Infinity
+  if (exp ==255) return 0x80000000;
+  // E = exp - bias
+  int biasExp = exp - 127;
+  // add implicit leading bit 1 for normal value
+  int frac1 = frac | 0x800000; //24
+  if (biasExp > 31) // overflow 
+    return 0x80000000;
+  else if (biasExp < 0)
+    return 0;
+  if (biasExp > 23)
+    frac1 = frac1 << (biasExp - 23);
+  else if (biasExp < 23)
+    frac1 = frac1 >> (23 - biasExp);
+  if(sign)  return ~frac1 + 1;
+  else return frac1; 
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
