@@ -325,7 +325,7 @@ int floatFloat2Int(unsigned uf) {
   // NaN or Infinity
   if (exp ==255) return 0x80000000;
   // E = exp - bias
-  int biasExp = exp - 127;
+  int biasExp =  exp - 127;
   // add implicit leading bit 1 for normal value
   int frac1 = frac | 0x800000; //24
   if (biasExp > 31) // overflow 
@@ -353,5 +353,11 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    if (x < -127) {
+      return 0;
+    } else if ( x > 128) {
+      return 0x7f800000;
+    } else {
+      return (x+127) <<23;
+    }
 }
